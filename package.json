@@ -1,0 +1,35 @@
+{
+  "name": "mayer-and-store-story",
+  "private": true,
+  "version": "0.0.1",
+  "description": "a mini simulation game",
+  "author": "iray",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
+    "cross-env": "^10.1.0",
+    "electron": "^41.0.2",
+    "electron-builder": "^26.8.1",
+    "javascript-obfuscator": "^5.3.0",
+    "rollup-plugin-obfuscator": "^1.1.0",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.1",
+    "vite-plugin-bundle-obfuscator": "^1.10.0",
+    "vite-plugin-javascript-obfuscator": "^3.1.0",
+    "vite-plugin-singlefile": "^2.3.0"
+  },
+  "dependencies": {
+    "@types/node": "^25.5.0",
+    "crypto-js": "^4.2.0",
+    "simplex-noise": "^4.0.3",
+    "terser": "^5.46.0"
+  },
+  "files": [
+    "dist/**/*"
+  ]
+}

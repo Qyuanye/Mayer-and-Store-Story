@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Mayer and shop story</title>
+    <link rel="stylesheet" href="src/css/game.css" />
+    <link rel="stylesheet" href="src/css/dialog.css" />
+    <link
+      rel="icon"
+      href="src/assets/favicon.svg"
+      type="image/svg+xml"
+    />
+  </head>
+  <body>
+    <div class="main-container">
+      <div class="sidebar-panel" id="sidebarMenu">
+        <button id="place">放置</button>
+        <button id="demolish">摧毁</button>
+        <button id="myshop">商店</button>
+        <button id="items">道具</button>
+        <button id="goldshop">金币商店</button>
+        <button id="help">帮助</button>
+      </div>
+      
+      <div class="info-panel" id="infoPanel">
+        <div class="info-row">
+          <span class="info-label">木头：</span
+          ><span class="info-value" data-res="wood">0</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">金属：</span
+          ><span class="info-value" data-res="metal">0</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">水：</span
+          ><span class="info-value" data-res="water">0</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">纤维：</span
+          ><span class="info-value" data-res="fabric">0</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">石头：</span
+          ><span class="info-value" data-res="stone">0</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">食物：</span
+          ><span class="info-value" data-res="food">0</span>
+        </div>
+        <!-- <div class="info-row">
+          <span class="info-label">电力：</span
+          ><span class="info-value" id="resRating"></span>
+        </div> -->
+      </div>
+
+      <div class="canvas-wrapper">
+        <canvas id="mainCanvas"></canvas>
+      </div>
+
+      <div class="progress-bar-container">
+        <div class="progress-segment"></div>
+        <div class="progress-segment"></div>
+        <div class="progress-segment"></div>
+        <div class="progress-segment"></div>
+        <div class="progress-segment"></div>
+      </div>
+
+      <div>
+        <button id="save">保存</button>
+        <div class="value-table">
+          <table>
+            <tr>
+              <td>金钱：</td>
+              <td>黄金：</td>
+              <td>人气：</td>
+            </tr>
+            <tr>
+              <td>繁荣度：</td>
+              <td>人口：</td>
+              <td>评级：</td>
+            </tr>
+          </table>
+        </div>
+        <button id="menu">菜单</button>
+      </div>
+    </div>
+
+    <script type="module" src="src/main.ts"></script>
+    <script  src="./src/animation.js"></script>
+  </body>
+</html>
