@@ -1,3 +1,5 @@
+import {showTextDialog} from "./dialog.ts";
+
 export enum Color {
   lightBlue = "#e1f0ff",
   blue = "#4a90e2",
@@ -177,7 +179,7 @@ export let playerData: PlayerDatas = {
 export const gameConfig = {
   FIXED_COST: 60,
   GRID_SIZE: 12, //格子大小
-  DAY_SECOND: 15,//一天的秒数
+  DAY_SECOND: 12,//一天的秒数
   SHOW_TILE_TEXT:true,
 };
 
@@ -262,8 +264,6 @@ export const nearbyResBonus: Record<string, Partial<Resource>> = {
   cs: { metal: 1, food: 1 },
   fc: { wood: 1, food: 1, fabric: 1 },
 };
-
-export type TileDataWPos = TileData & Pick<GridCell, "row" | "col">;
 
 export interface PlayerDatas {
   money: number;
@@ -510,14 +510,14 @@ export interface RandomActivity {
 }
 
 
-export const Activities:RandomActivity[]=[
+export const randActivities:RandomActivity[]=[
   {
     requirement:{
-      money:10000
+      money:1000
     },
     triggered:false,
     activity:()=>{
-
+      showTextDialog(["你完成了赚到一万块成就"])
     }
   }
 ]

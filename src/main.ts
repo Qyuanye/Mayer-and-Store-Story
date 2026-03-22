@@ -25,7 +25,7 @@ export let state: Appstats = {
 
 async function newGame(): Promise<void> {
   scene.refresh();
-  await asyncDialog("text", ["欢迎来到商店模拟器！", "首先取一个名字吧"]);
+  await asyncDialog("text", ["欢迎来到市长与商店物语！", "首先取一个名字吧"]);
   await asyncDialog<string>(
   "input",
   "请输入你的名字",

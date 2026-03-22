@@ -3,13 +3,13 @@ import {
   multiByResource,
   updatePlayerData,
 } from "./utils";
-import { TileResConfig, TileType, gameConfig } from "./data";
+import { TileResConfig, TileType, gameConfig, randActivities, type PlayerEffect } from "./data";
 import { addResources, multiResource, checkTile } from "./utils";
 import { playerData } from "./data";
 import { scheduler } from "./schedular";
 import { ProgressBar } from "./timebar.ts";
 
-function applyTileResBonus(): void {
+function applyTileBonus(): void {
   let totalAddRes: Resource = {
     wood: 0,
     metal: 0,
@@ -219,9 +219,46 @@ export function applyShopBonus(): void {
   );
 }
 
+function doRandomActivity(): void {
+  const { prosperity, population, money, popularity } = playerData;
+  //需要用到的玩家数据
+  const data = { money, prosperity, population, popularity };
+  let triggeredThisTurn = false;
+  //筛选出未触发过的且排序一下
+  const act = randActivities
+    .map((item, index) => ({ item, index }))
+    .filter((wrapper) => !wrapper.item.triggered)
+    .sort((a, b) => {
+      const reqA = a.item.requirement;
+      const reqB = b.item.requirement;
+      const keyA = Object.keys(reqA)[0] as keyof PlayerEffect;
+      const keyB = Object.keys(reqB)[0] as keyof PlayerEffect;
+      if (keyA !== keyB) return keyA.localeCompare(keyB);
+      const valA = reqA[keyA];
+      const valB = reqB[keyB];
+      return (valA ?? 0) > (valB ?? 0) ? 1 : -1;
+    });
+  //事件的key名
+  const keys = act.map((e) => Object.keys(e.item.requirement)[0]);
+  Object.entries(data).forEach(([key, value]) => {
+    if (triggeredThisTurn) return;//触发一次
+    const matched = keys.indexOf(key);//按key逐一匹配
+    if (matched < 0) return;
+    const pvalue = Object.entries(data).find((e) => {
+      if (e[0] === key) return e[1];
+    })!;
+    if (value <= pvalue[1]) {
+      randActivities[act[matched].index].triggered = true;
+      act[matched].item.activity();
+      triggeredThisTurn = true;
+    }
+  });
+}
+
 const progressBar = new ProgressBar(gameConfig.DAY_SECOND, 5, () => {
   applyShopBonus();
-  applyTileResBonus();
+  applyTileBonus();
+  doRandomActivity();
 });
 
 let lastTimestamp = 0;
