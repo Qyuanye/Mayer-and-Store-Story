@@ -15,7 +15,7 @@ import {
 import { GameScene } from "./scene.ts";
 import { generateMap } from "./map.ts";
 import {preloadAssets} from "./assets.ts";
-import { introduction } from "./gtext.ts";
+import { initText, introduction } from "./gtext.ts";
 
 export const scene = new GameScene("mainCanvas");
 export let state: Appstats = {
@@ -25,7 +25,7 @@ export let state: Appstats = {
 
 async function newGame(): Promise<void> {
   scene.refresh();
-  await asyncDialog("text", ["欢迎来到市长与商店物语！", "首先取一个名字吧"]);
+  await asyncDialog("text", initText);
   await asyncDialog<string>(
   "input",
   "请输入你的名字",

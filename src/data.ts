@@ -504,7 +504,7 @@ export const ShopGoods: Goods[] = [
 ];
 
 export interface RandomActivity {
-  requirement: PlayerEffect,
+  requirement:PlayerEffect,
   triggered: boolean;
   activity: () => void;
 }
@@ -513,11 +513,35 @@ export interface RandomActivity {
 export const randActivities:RandomActivity[]=[
   {
     requirement:{
-      money:1000
+     money:5000
     },
     triggered:false,
     activity:()=>{
-      showTextDialog(["你完成了赚到一万块成就"])
+      showTextDialog(["你完成了赚到五千块成就\n人气与繁荣度已提升！"])
+      playerData.population+=3;
+      playerData.prosperity+=3;
+    }
+  },
+  {
+    requirement:{
+     money:10000
+    },
+    triggered:false,
+    activity:()=>{
+      showTextDialog(["你完成了赚到一万块成就\n人气与繁荣度已提升！"])
+      playerData.population+=5;
+      playerData.prosperity+=5;
+    }
+  },
+  {
+    requirement:{
+     money:50000
+    },
+    triggered:false,
+    activity:()=>{
+      showTextDialog(["你完成了赚到五万块成就\n人气与繁荣度已提升！"])
+      playerData.population+=7;
+      playerData.prosperity+=7;
     }
   }
 ]
