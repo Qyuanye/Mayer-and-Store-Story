@@ -127,6 +127,7 @@ popularity:"人气",
 
 
 export let playerData: PlayerDatas = {
+  day:1,
   money: 800,
   gold: 10,
   popularity: 100,
@@ -173,6 +174,13 @@ export let playerData: PlayerDatas = {
       onSale: true,
     },
   ],
+  weather:{
+    type:"sunny",last:10,
+    effect:{
+      prosperity:0,
+      popularity:0
+    }
+  }
 };
 
 //配置
@@ -257,15 +265,24 @@ export const NeighborBonusConfig = [
   { types: [TileType.forest, TileType.river], bonusKey: "fr" },
   { types: [TileType.city, TileType.shop], bonusKey: "cs" },
   { types: [TileType.forest, TileType.city], bonusKey: "fc" },
+  { types: [TileType.airport, TileType.city], bonusKey: "ac" },
+  { types: [TileType.factory, TileType.airport], bonusKey: "fa" },
+  { types: [TileType.factory, TileType.mountain], bonusKey: "fm" },
 ];
 
 export const nearbyResBonus: Record<string, Partial<Resource>> = {
   fr: { wood: 1, water: 1, food: 1 },
   cs: { metal: 1, food: 1 },
   fc: { wood: 1, food: 1, fabric: 1 },
+  ac: { food: 2, stone: 1 },
+  fa: { metal: 1, food: 1, wood: 1 },
+  fm: { stone: 1, wood: 1 },
 };
 
+type Weather="sunny"|"rainy"|"thunder"|"foggy"|"ice";
+
 export interface PlayerDatas {
+  day:number;
   money: number;
   gold: number;
   popularity: number;
@@ -283,6 +300,10 @@ export interface PlayerDatas {
   unlockGoods: GoodsStatus[];
   lasttotalIncome: number;
   lastnetIncome: number;
+  weather:{type:Weather,
+    last:number,
+    effect:PlayerEffect
+  }
 }
 
 //玩家属性效果
@@ -484,7 +505,7 @@ export const ShopGoods: Goods[] = [
   {
     name: "📿奢侈品",
     price: 600,
-    refPrice: 500,
+    refPrice: 520,
     cost: 420,
     baseDemand: 0.005,
     elasticity: 2,
@@ -517,7 +538,7 @@ export const randActivities:RandomActivity[]=[
     },
     triggered:false,
     activity:()=>{
-      showTextDialog(["你完成了赚到五千块成就\n人气与繁荣度已提升！"])
+      showTextDialog(["你完成了赚到五千块成就\n人口与繁荣度已提升！"])
       playerData.population+=3;
       playerData.prosperity+=3;
     }
@@ -528,9 +549,8 @@ export const randActivities:RandomActivity[]=[
     },
     triggered:false,
     activity:()=>{
-      showTextDialog(["你完成了赚到一万块成就\n人气与繁荣度已提升！"])
-      playerData.population+=5;
-      playerData.prosperity+=5;
+      showTextDialog(["你完成了赚到一万块成就\n获得10金币！"])
+      playerData.gold+=10;
     }
   },
   {
@@ -539,9 +559,43 @@ export const randActivities:RandomActivity[]=[
     },
     triggered:false,
     activity:()=>{
-      showTextDialog(["你完成了赚到五万块成就\n人气与繁荣度已提升！"])
-      playerData.population+=7;
-      playerData.prosperity+=7;
+      showTextDialog(["你完成了赚到五万块成就\n获得20金币！"])
+      playerData.gold+=20;
+    }
+  },
+  {
+    requirement:{
+     population:200
+    },
+    triggered:false,
+    activity:()=>{
+      showTextDialog(["你完成了200人口成就\n人气已提升！"])
+      playerData.popularity+=2;
     }
   }
 ]
+
+export const weatherEffect:Record<Weather,PlayerEffect>={
+  sunny:{
+    get popularity(){
+      return playerData.popularity*0.03;
+    }
+  },
+  rainy:{
+    get popularity(){
+      return playerData.popularity*0.03;
+    }
+  },
+  foggy:{
+  },
+  thunder:{
+    get popularity(){
+      return playerData.popularity*0.07;
+    }
+  },
+  ice:{
+    get prosperity(){
+      return playerData.prosperity*0.07;
+    }
+  }
+}

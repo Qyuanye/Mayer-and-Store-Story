@@ -125,6 +125,5 @@ function addListener(): void {
   const menu = document.querySelector("#menu") as HTMLButtonElement;
   save.disabled = false;
   menu.disabled = false;
-  (window as any).playerData = playerData;
   mainLoop();
 })();

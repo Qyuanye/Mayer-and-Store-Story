@@ -1,9 +1,10 @@
 import {
+  getRandomNumber,
   getSingleTileNearbyBonus,
   multiByResource,
   updatePlayerData,
 } from "./utils";
-import { TileResConfig, TileType, gameConfig, randActivities, type PlayerEffect } from "./data";
+import { TileResConfig, TileType, gameConfig, randActivities, weatherEffect, type PlayerEffect } from "./data";
 import { addResources, multiResource, checkTile } from "./utils";
 import { playerData } from "./data";
 import { scheduler } from "./schedular";
@@ -217,6 +218,7 @@ export function applyShopBonus(): void {
   playerData.score = Math.floor(
     60 * profitFactor + playerData.population / 10 + playerData.prosperity / 10,
   );
+  playerData.day+=1;
 }
 
 function doRandomActivity(): void {
@@ -255,10 +257,58 @@ function doRandomActivity(): void {
   });
 }
 
+function doWeatherActivity(): void {
+  playerData.weather.last -= 1;
+  const doWeatherEffect: (bonus: boolean) => void = (bonus) => {
+    switch (playerData.weather.type) {
+      case "sunny": {
+          playerData.weather.effect.popularity! -=bonus?
+            -weatherEffect.sunny.popularity!:weatherEffect.sunny.popularity!;
+        break;
+      }
+      case "rainy": {
+          playerData.weather.effect.popularity! -=bonus?
+            -weatherEffect.rainy.popularity!:weatherEffect.rainy.popularity!;
+        break;
+      }
+      case "foggy":
+        break;
+      case "ice":
+      case "thunder": {
+          playerData.weather.effect.prosperity! -=bonus?
+            -weatherEffect.ice.prosperity!:weatherEffect.ice.prosperity!;
+        break;
+      }
+      default:
+        break;
+    }
+  };
+  const makeWeather: () => void = () => {
+    //清除之前的
+    doWeatherEffect(true);
+    const prob = getRandomNumber(0, 10) / 10;
+    if (prob < 0.5) playerData.weather.type = "sunny";
+    else if (prob >= 0.5 && prob < 0.7) playerData.weather.type = "rainy";
+    else if (prob >= 0.7 && prob < 0.8) playerData.weather.type = "foggy";
+    else if (prob >= 0.8 && prob < 0.9) playerData.weather.type = "ice";
+    else playerData.weather.type = "thunder";
+    playerData.weather.last = playerData.weather.type === "sunny" ? 10 : 5;
+  };
+  if (playerData.weather.last === 0) {
+    makeWeather();
+    doWeatherEffect(false);
+  }else if(playerData.weather.type==='sunny'&&playerData.weather.last===10){
+    doWeatherEffect(true);
+  }else if(playerData.weather.type!=='sunny'&&playerData.weather.last===5){
+    doWeatherEffect(true);
+  }
+}
+
 const progressBar = new ProgressBar(gameConfig.DAY_SECOND, 5, () => {
   applyShopBonus();
   applyTileBonus();
   doRandomActivity();
+  doWeatherActivity();
 });
 
 let lastTimestamp = 0;

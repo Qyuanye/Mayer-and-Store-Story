@@ -248,7 +248,7 @@ export function menuShop() {
           {} as Partial<Resource>,
         );
       showTextDialog([
-        `${playerData.name}的商店昨日数据
+        `${playerData.name}的商店第${playerData.day}日数据
         1. 总营收:${Math.floor(playerData.lasttotalIncome || 0)}
         2. 基础营收:${baseIncomeGlobal}
         3. 商品营收:${onSell.map((e) => e.price * e.sold).reduce((total, i) => total + i, 0)}
