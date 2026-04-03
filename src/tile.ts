@@ -302,6 +302,11 @@ function doWeatherActivity(): void {
   }else if(playerData.weather.type!=='sunny'&&playerData.weather.last===5){
     doWeatherEffect(true);
   }
+  playWeatherAnim();
+}
+
+function playWeatherAnim():void{
+
 }
 
 const progressBar = new ProgressBar(gameConfig.DAY_SECOND, 5, () => {

@@ -1,12 +1,18 @@
 import { TileType } from "./data";
-import airport from "./assets/airport.svg?url"
-import city from "./assets/city.svg?url"
-import factory from "./assets/factory.svg?url"
-import forest from "./assets/forest.svg?url"
-import grass from "./assets/grass.svg?url"
-import mountain from "./assets/mountain.svg?url"
-import river from "./assets/river.svg?url"
-import shop from "./assets/shop.svg?url"
+import airport from "./assets/tile/airport.svg?url"
+import city from "./assets/tile/city.svg?url"
+import factory from "./assets/tile/factory.svg?url"
+import forest from "./assets/tile/forest.svg?url"
+import grass from "./assets/tile/grass.svg?url"
+import mountain from "./assets/tile/mountain.svg?url"
+import river from "./assets/tile/river.svg?url"
+import shop from "./assets/tile/shop.svg?url"
+
+import sunny from "./assets/weather/sunny.svg?url"
+import rainy from "./assets/weather/rainy.svg?url"
+import foggy from "./assets/weather/foggy.svg?url"
+import ice from "./assets/weather/ice.svg?url"
+import thunder from "./assets/weather/thunder.svg?url"
 
 export const tileImages: Record<string, HTMLImageElement> = {};
 
