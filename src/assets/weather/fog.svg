@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+    <g opacity="0.25">
+        <rect x="-64" y="10" width="128" height="12" fill="#d5d8dc">
+            <animate attributeName="x" from="-64" to="0" dur="12s" repeatCount="indefinite"/>
+        </rect>
+        <rect x="-32" y="26" width="128" height="10" fill="#bdc3c7">
+            <animate attributeName="x" from="-32" to="32" dur="14s" repeatCount="indefinite"/>
+        </rect>
+    </g>
+    <g opacity="0.18">
+        <rect x="-80" y="40" width="160" height="12" fill="#ecf0f1">
+            <animate attributeName="x" from="-80" to="0" dur="16s" repeatCount="indefinite"/>
+        </rect>
+    </g>
+    <g opacity="0.12">
+        <rect x="-40" y="18" width="80" height="6" fill="#ffffff">
+            <animate attributeName="x" from="-40" to="24" dur="10s" repeatCount="indefinite"/>
+        </rect>
+        <rect x="-20" y="34" width="80" height="6" fill="#ffffff">
+            <animate attributeName="x" from="-20" to="44" dur="13s" repeatCount="indefinite"/>
+        </rect>
+    </g>
+</svg>

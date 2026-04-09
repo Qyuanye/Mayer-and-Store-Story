@@ -58,6 +58,28 @@ canvas {
   display: block;
 }
 
+/* 天气动画 */
+.weather-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* 关键：不阻挡鼠标点击事件 */
+  z-index: 10; /* 盖在 Canvas 上面 */
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 覆盖层内部插入的 SVG 图片样式 */
+.weather-overlay img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 保证 SVG 铺满整个容器，可能会被裁切边缘 */
+}
+
 button {
   padding: 12px;
   cursor: pointer;
@@ -292,11 +314,9 @@ div:last-of-type {
   color: #ffffff;
   font-size: 10px;
   font-weight: bold;
-
   line-height: 1;
   padding: 3px 4px 2px 4px; 
   vertical-align: middle;
-
   border-radius: 4px;
   margin-left: 6px;
   display: inline-block;
@@ -322,4 +342,26 @@ div:last-of-type {
 
 .progress-segment.active {
   background-color: #4a90e2;
+}
+
+.weather-icon-cell {
+  vertical-align: middle;
+  text-align: center;
+  padding: 4px; 
+}
+
+.weather-icon-cell svg,/*限制尺寸*/
+.weather-icon-cell img {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  max-height: 42px; 
+  object-fit: contain;
+  image-rendering: pixelated; 
+}
+
+.weather-text-cell {
+  font-weight: bold;
+  color: #1e90ff;
+  text-align: center;
 }

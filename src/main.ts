@@ -1,9 +1,7 @@
-import { presetTile, playerData } from "./data";
 import { asyncDialog, showTaskHint, hideTaskHint} from "./dialog";
 import { updatePlayerData } from "./utils";
 import { saveGame, loadGame } from "./saveload";
 import { mainLoop } from "./tile";
-import { TileType } from "./data";
 import {
   menuDemonishTile,
   menuGoldshop,
@@ -14,8 +12,10 @@ import {
 } from "./menu";
 import { GameScene } from "./scene.ts";
 import { generateMap } from "./map.ts";
-import {preloadAssets} from "./assets.ts";
 import { initText, introduction } from "./gtext.ts";
+import {presetTile, TileType} from "./types.ts";
+import {playerData} from "./data.ts";
+import {preloadAllAssets} from "./assets.ts";
 
 export const scene = new GameScene("mainCanvas");
 export let state: Appstats = {
@@ -89,7 +89,13 @@ function addListener(): void {
 
 
 (async () => {
-  await preloadAssets();
+  try {
+    await preloadAllAssets();
+  } catch (err) {
+    await asyncDialog("text", [
+      `资源加载失败，可能会导致无法显示图片。${(err as Error).message}`,
+    ]);
+  }
   addListener();
   const shouldLoad = await asyncDialog("confirm", "加载存档吗?");
   if (shouldLoad) {

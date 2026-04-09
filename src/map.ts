@@ -1,7 +1,8 @@
 import { createNoise2D } from "simplex-noise";
 import { getRandomNumber, checkTile } from "./utils.ts";
-import { gameConfig, presetTile, TileType } from "./data.ts";
 import { scene } from "./main";
+import {presetTile, TileType} from "./types.ts";
+import {gameConfig} from "./data.ts";
 
 function fbm(noise2D: (x: number, y: number) => number, x: number, y: number, octaves = 5, lacunarity = 2, gain = 0.5) {
   let amplitude = 1;

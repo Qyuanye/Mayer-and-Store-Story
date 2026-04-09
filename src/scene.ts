@@ -1,16 +1,4 @@
 import {
-  type TileData,
-  Color,
-  gameConfig,
-  type GridCell,
-  levelupRes,
-  playerData,
-  presetTile,
-  TileDataConfig, TileName,
-  TileResConfig,
-  TileType,
-} from "./data";
-import {
   asyncDialog,
   hideTaskHint,
   showButtonTextDialog,
@@ -30,6 +18,8 @@ import {
   subResources,
 } from "./utils";
 import {tileImages} from "./assets.ts";
+import {Color, type GridCell, presetTile, type TileData, TileName, TileType} from "./types.ts";
+import {gameConfig, levelupRes, playerData, TileDataConfig, TileResConfig} from "./data.ts";
 
 export class GameScene {
   private canvas: HTMLCanvasElement;
