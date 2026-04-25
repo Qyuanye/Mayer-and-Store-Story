@@ -247,10 +247,8 @@ function doRandomActivity(): void {
     if (triggeredThisTurn) return;//触发一次
     const matched = keys.indexOf(key);//按key逐一匹配
     if (matched < 0) return;
-    const pvalue = Object.entries(data).find((e) => {
-      if (e[0] === key) return e[1];
-    })!;
-    if (value <= pvalue[1]) {
+    const pvalue = act[matched].item.requirement[key as keyof PlayerEffect] ?? 0;
+    if (value <= pvalue) {
       randActivities[act[matched].index].triggered = true;
       act[matched].item.activity();
       triggeredThisTurn = true;
@@ -259,51 +257,51 @@ function doRandomActivity(): void {
 }
 
 function doWeatherActivity(): void {
-  playerData.weather.last -= 1;
-  const doWeatherEffect: (bonus: boolean) => void = (bonus) => {
-    switch (playerData.weather.type) {
-      case "sunny": {
-          playerData.weather.effect.popularity! -=bonus?
-            -weatherEffect.sunny.popularity!:weatherEffect.sunny.popularity!;
-        break;
-      }
-      case "rainy": {
-          playerData.weather.effect.popularity! -=bonus?
-            -weatherEffect.rainy.popularity!:weatherEffect.rainy.popularity!;
-        break;
-      }
-      case "foggy":
-        break;
-      case "hail":
-      case "thunder": {
-          playerData.weather.effect.prosperity! -=bonus?
-            -weatherEffect.hail.prosperity!:weatherEffect.hail.prosperity!;
-        break;
-      }
-      default:
-        break;
-    }
-  };
-  const makeWeather: () => void = () => {
-    //清除之前的
-    doWeatherEffect(true);
-    const prob = getRandomNumber(0, 10) / 10;
-    if (prob < 0.5) playerData.weather.type = Weather.sunny;
-    else if (prob >= 0.5 && prob < 0.7) playerData.weather.type = Weather.rainy;
-    else if (prob >= 0.7 && prob < 0.8) playerData.weather.type = Weather.foggy;
-    else if (prob >= 0.8 && prob < 0.9) playerData.weather.type = Weather.hail;
-    else playerData.weather.type = Weather.thunder;
-    playerData.weather.last = playerData.weather.type === Weather.sunny ? 10 : 5;
-  };
-  if (playerData.weather.last === 0) {
-    makeWeather();
-    doWeatherEffect(false);
-  }else if(playerData.weather.type===Weather.sunny&&playerData.weather.last===10){
-    doWeatherEffect(true);
-  }else if(playerData.weather.type!==Weather.sunny&&playerData.weather.last===5){
-    doWeatherEffect(true);
+  const weatherTable: { weather: Weather; weight: number }[] = [
+    { weather: Weather.sunny, weight: 50 },
+    { weather: Weather.rainy, weight: 20 },
+    { weather: Weather.foggy, weight: 10 },
+    { weather: Weather.hail, weight: 10 },
+    { weather: Weather.thunder, weight: 10 },
+  ];
+
+  function applyWeatherEffect(weather: Weather) {
+    const wEff = weatherEffect[weather];
+    if (wEff.popularity)
+      playerData.weather.effect.popularity! += wEff.popularity;
+    if (wEff.prosperity)
+      playerData.weather.effect.prosperity! += wEff.prosperity;
   }
-  playWeatherAnime();
+
+  function removeWeatherEffect(weather: Weather) {
+    const wEff = weatherEffect[weather];
+    if (wEff.popularity)
+      playerData.weather.effect.popularity! -= wEff.popularity;
+    if (wEff.prosperity)
+      playerData.weather.effect.prosperity! -= wEff.prosperity;
+  }
+
+  function pickRandomWeather(): Weather {
+    const totalWeight = weatherTable.reduce((s, w) => s + w.weight, 0);
+    let r = getRandomNumber(1, totalWeight);
+    for (const entry of weatherTable) {
+      r -= entry.weight;
+      if (r <= 0) return entry.weather;
+    }
+    return Weather.sunny;
+  }
+  playerData.weather.last -= 1;
+  if (playerData.weather.last <= 0) {
+    //旧天气过期
+    removeWeatherEffect(playerData.weather.type);
+    //给新的
+    const newWeather = pickRandomWeather();
+    playerData.weather.type = newWeather;
+    playerData.weather.last = newWeather === Weather.sunny ? 10 : 5;
+    applyWeatherEffect(newWeather);
+    playWeatherAnime();
+    return;
+  }
 }
 
 function playWeatherAnime():void{
