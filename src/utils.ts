@@ -1,15 +1,16 @@
+import { weatherIcons } from "./assets.ts";
+import {gameConfig, nearbyResBonus, NeighborBonusConfig, playerData} from "./data";
+import { scene } from "./main.ts";
 import {
-  TileType,
-  type TileData,
-  playerData,
-  Rates,
+  effectName,
   type GlobalItem,
   type PlayerEffect,
-  type TileItem,
-  resourceName, NeighborBonusConfig, nearbyResBonus, effectName,
-} from "./data";
-import { gameConfig } from "./data";
-import { scene } from "./main.ts";
+  Rates,
+  resourceName,
+  type TileData,
+  type TileItem, TileType,
+  weatherName
+} from "./types.ts";
 
 export function shuffleArray<T>(arr: T[]): T[] {
   const result = [...arr];
@@ -224,6 +225,16 @@ export function updatePlayerData(): void {
           Rates[Math.floor(playerData.score / 100)]) as keyof typeof Rates;
     }
   });
+  //天气图标
+  const iconContainer = document.getElementById("weatherIconContainer");
+  const textContainer = document.getElementById("weatherText");
+  if (iconContainer && textContainer) {
+    iconContainer.innerHTML = "";
+    const newIcon = weatherIcons[playerData.weather.type];
+    if (newIcon) iconContainer.appendChild(newIcon);
+    textContainer.textContent =
+      weatherName[playerData.weather.type] + `(${playerData.weather.last}天)`;
+  }
 }
 
 export function applyGlobalItemEffect(item: GlobalItem) {

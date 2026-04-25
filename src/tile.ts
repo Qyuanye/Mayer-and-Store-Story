@@ -4,11 +4,12 @@ import {
   multiByResource,
   updatePlayerData,
 } from "./utils";
-import { TileResConfig, TileType, gameConfig, randActivities, weatherEffect, type PlayerEffect } from "./data";
 import { addResources, multiResource, checkTile } from "./utils";
-import { playerData } from "./data";
+import {gameConfig, playerData, randActivities, TileResConfig, weatherEffect} from "./data";
 import { scheduler } from "./schedular";
 import { ProgressBar } from "./timebar.ts";
+import {type PlayerEffect, type TileType, Weather} from "./types.ts";
+import { weatherAnime } from "./assets.ts";
 
 function applyTileBonus(): void {
   let totalAddRes: Resource = {
@@ -273,10 +274,10 @@ function doWeatherActivity(): void {
       }
       case "foggy":
         break;
-      case "ice":
+      case "hail":
       case "thunder": {
           playerData.weather.effect.prosperity! -=bonus?
-            -weatherEffect.ice.prosperity!:weatherEffect.ice.prosperity!;
+            -weatherEffect.hail.prosperity!:weatherEffect.hail.prosperity!;
         break;
       }
       default:
@@ -287,26 +288,33 @@ function doWeatherActivity(): void {
     //清除之前的
     doWeatherEffect(true);
     const prob = getRandomNumber(0, 10) / 10;
-    if (prob < 0.5) playerData.weather.type = "sunny";
-    else if (prob >= 0.5 && prob < 0.7) playerData.weather.type = "rainy";
-    else if (prob >= 0.7 && prob < 0.8) playerData.weather.type = "foggy";
-    else if (prob >= 0.8 && prob < 0.9) playerData.weather.type = "ice";
-    else playerData.weather.type = "thunder";
-    playerData.weather.last = playerData.weather.type === "sunny" ? 10 : 5;
+    if (prob < 0.5) playerData.weather.type = Weather.sunny;
+    else if (prob >= 0.5 && prob < 0.7) playerData.weather.type = Weather.rainy;
+    else if (prob >= 0.7 && prob < 0.8) playerData.weather.type = Weather.foggy;
+    else if (prob >= 0.8 && prob < 0.9) playerData.weather.type = Weather.hail;
+    else playerData.weather.type = Weather.thunder;
+    playerData.weather.last = playerData.weather.type === Weather.sunny ? 10 : 5;
   };
   if (playerData.weather.last === 0) {
     makeWeather();
     doWeatherEffect(false);
-  }else if(playerData.weather.type==='sunny'&&playerData.weather.last===10){
+  }else if(playerData.weather.type===Weather.sunny&&playerData.weather.last===10){
     doWeatherEffect(true);
-  }else if(playerData.weather.type!=='sunny'&&playerData.weather.last===5){
+  }else if(playerData.weather.type!==Weather.sunny&&playerData.weather.last===5){
     doWeatherEffect(true);
   }
-  playWeatherAnim();
+  playWeatherAnime();
 }
 
-function playWeatherAnim():void{
-
+function playWeatherAnime():void{
+  const weather = playerData.weather.type;
+  const overlay = document.getElementById("weatherOverlay");
+  if (!overlay) return;
+  overlay.innerHTML = "";
+  if (weather && weatherAnime[weather]) {
+    const svgImg = weatherAnime[weather].cloneNode(true) as HTMLImageElement;
+    overlay.appendChild(svgImg);
+  }
 }
 
 const progressBar = new ProgressBar(gameConfig.DAY_SECOND, 5, () => {

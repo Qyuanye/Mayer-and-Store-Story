@@ -1,6 +1,7 @@
-import {TileType, type GlobalItem, type TileItem, playerData} from "./data";
 import {multiResource} from "./utils.ts";
 import {showTextDialog} from "./dialog.ts";
+import {type GlobalItem, type TileItem, TileType} from "./types.ts";
+import {playerData} from "./data.ts";
 
 export const globalItems: Record<string, GlobalItem> = {
   propaganda_poster: {

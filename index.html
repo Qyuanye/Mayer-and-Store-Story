@@ -59,6 +59,7 @@
 
       <div class="canvas-wrapper">
         <canvas id="mainCanvas"></canvas>
+        <div id="weatherOverlay" class="weather-overlay"></div>
       </div>
 
       <div class="progress-bar-container">
@@ -71,20 +72,25 @@
 
       <div>
         <button id="save">保存</button>
-        <div class="value-table">
-          <table>
-            <tr>
-              <td>金钱：</td>
-              <td>黄金：</td>
-              <td>人气：</td>
-            </tr>
-            <tr>
-              <td>繁荣度：</td>
-              <td>人口：</td>
-              <td>评级：</td>
-            </tr>
-          </table>
-        </div>
+          <div class="value-table">
+            <table>
+              <tr>
+                <td>金钱：<span id="val-money">0</span></td>
+                <td>黄金：<span id="val-gold">0</span></td>
+                <td rowspan="2" class="weather-icon-cell" id="weatherIconContainer">
+                  </td>
+              </tr>
+              <tr>
+                <td>人气：<span id="val-pop">0</span></td>
+                <td>繁荣：<span id="val-pros">0</span></td>
+              </tr>
+              <tr>
+                <td>人口：<span id="val-people">0</span></td>
+                <td>评级：<span id="val-rating">0</span></td>
+                <td class="weather-text-cell" id="weatherText">天气</td>
+              </tr>
+            </table>
+          </div>
         <button id="menu">菜单</button>
       </div>
     </div>

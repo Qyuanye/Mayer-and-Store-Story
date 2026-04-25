@@ -1,13 +1,4 @@
 import {
-  playerData,
-  presetTile,
-  ShopGoods,
-  TileDataConfig,
-  TileName,
-  TileResConfig,
-  TileType,
-} from "./data";
-import {
   asyncDialog,
   hideTaskHint,
   showConfirmDialog,
@@ -31,6 +22,8 @@ import {
 import { goldItems, globalItems, tileItems } from "./itemLibrary.ts";
 import { baseIncomeGlobal, fixedCost } from "./tile.ts";
 import { help, helpText1, helpText2, helpText3, helpText4 } from "./gtext.ts";
+import {playerData, ShopGoods, TileDataConfig, TileResConfig} from "./data.ts";
+import {presetTile, TileName, TileType} from "./types.ts";
 
 export function menuPlaceTile(): void {
   //过滤不能放的

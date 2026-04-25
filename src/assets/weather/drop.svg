@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+    <g opacity="0.4">
+        <rect x="10" y="-10" width="2" height="6" fill="#3498db">
+            <animate attributeName="y" from="-10" to="70" dur="1.2s" repeatCount="indefinite"/>
+        </rect>
+        <rect x="20" y="-20" width="2" height="6" fill="#3498db">
+            <animate attributeName="y" from="-20" to="70" dur="1.5s" repeatCount="indefinite"/>
+        </rect>
+        <rect x="30" y="-15" width="2" height="6" fill="#3498db">
+            <animate attributeName="y" from="-15" to="70" dur="1.3s" repeatCount="indefinite"/>
+        </rect>
+        <rect x="40" y="-25" width="2" height="6" fill="#3498db">
+            <animate attributeName="y" from="-25" to="70" dur="1.4s" repeatCount="indefinite"/>
+        </rect>
+        <rect x="50" y="-5" width="2" height="6" fill="#3498db">
+            <animate attributeName="y" from="-5" to="70" dur="1.1s" repeatCount="indefinite"/>
+        </rect>
+        <rect x="15" y="-30" width="2" height="6" fill="#3498db">
+            <animate attributeName="y" from="-30" to="70" dur="1.6s" repeatCount="indefinite"/>
+        </rect>
+        <rect x="35" y="-40" width="2" height="6" fill="#3498db">
+            <animate attributeName="y" from="-40" to="70" dur="1.8s" repeatCount="indefinite"/>
+        </rect>
+        <rect x="45" y="-35" width="2" height="6" fill="#3498db">
+            <animate attributeName="y" from="-35" to="70" dur="1.7s" repeatCount="indefinite"/>
+        </rect>
+    </g>
+</svg>
