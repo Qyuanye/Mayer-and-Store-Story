@@ -284,4 +284,39 @@ export const goldItems: GoldItem[] = [
       showTextDialog(["仓库上限已提升20%！"]);
     },
   },
+  {
+    id: "resourcePack",
+    name: "📦资源补给包",
+    description: "立即获得所有基础资源各+50",
+    price: 2,
+    effect: () => {
+      const res = playerData.resource;
+      const limit = playerData.resourceLimit;
+      const keys: (keyof Resource)[] = ["wood", "metal", "water", "fabric", "stone", "food"];
+      keys.forEach(k => {
+        res[k] = Math.min(res[k] + 50, limit[k]);
+      });
+      showTextDialog(["已获得所有资源各+50！"]);
+    },
+  },
+  {
+    id: "incomeGuide",
+    name: "💼投资指南",
+    description: "永久提升每日净利润15%",
+    price: 7,
+    effect: () => {
+      playerData.incomeBonus += 15;
+      showTextDialog(["每日净利润已永久提升15%！（当前加成：" + playerData.incomeBonus + "%）"]);
+    },
+  },
+  {
+    id: "warehouseExpandII",
+    name: "🚀库存优化II",
+    description: "再次大幅提升资源储存上限30%",
+    price: 6,
+    effect: () => {
+      playerData.resourceLimit = multiResource(playerData.resourceLimit, 1.3);
+      showTextDialog(["资源储存上限已再次提升30%！"]);
+    },
+  },
 ];

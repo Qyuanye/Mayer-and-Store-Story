@@ -3,7 +3,7 @@ import {
   type Goods,
   type PlayerDatas,
   type PlayerEffect,
-  type RandomActivity,
+  type Achievement,
   Rates,
   TileType,
   Weather
@@ -21,6 +21,7 @@ export let playerData: PlayerDatas = {
   name: "玩家",
   totalprofit: 0,
   position: { row: 0, col: 0 },
+  incomeBonus: 0,
   lasttotalIncome: 0,
   lastnetIncome: 0,
   mapdata: [],
@@ -58,7 +59,7 @@ export let playerData: PlayerDatas = {
     },
   ],
   weather:{
-    type:Weather.rainy,last:10,
+    type:Weather.sunny,last:-2,
     effect:{
       prosperity:0,
       popularity:0
@@ -316,7 +317,7 @@ export const ShopGoods: Goods[] = [
 ];
 
 
-export const randActivities:RandomActivity[]=[
+export const achievements:Achievement[]=[
   {
     requirement:{
      money:5000
@@ -326,6 +327,7 @@ export const randActivities:RandomActivity[]=[
       showTextDialog(["你完成了赚到五千块成就\n人口与繁荣度已提升！"])
       playerData.population+=3;
       playerData.prosperity+=3;
+      playerData.gold+=1;
     }
   },
   {
@@ -335,7 +337,7 @@ export const randActivities:RandomActivity[]=[
     triggered:false,
     activity:()=>{
       showTextDialog(["你完成了赚到一万块成就\n获得10金币！"])
-      playerData.gold+=10;
+      playerData.gold+=1;
     }
   },
   {
@@ -345,7 +347,7 @@ export const randActivities:RandomActivity[]=[
     triggered:false,
     activity:()=>{
       showTextDialog(["你完成了赚到五万块成就\n获得20金币！"])
-      playerData.gold+=20;
+      playerData.gold+=1;
     }
   },
   {
@@ -356,6 +358,7 @@ export const randActivities:RandomActivity[]=[
     activity:()=>{
       showTextDialog(["你完成了200人口成就\n人气已提升！"])
       playerData.popularity+=2;
+      playerData.gold+=1;
     }
   }
 ]

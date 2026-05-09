@@ -1,6 +1,7 @@
 import { scene } from "./main";
 import * as CryptoJS from "crypto-js";
-import {playerData, type PlayerDatas} from "./data";
+import {playerData} from "./data";
+import {type PlayerDatas} from "./types";
 import { showTextDialog } from "./dialog";
 
 //我也不知道这个意义是什么

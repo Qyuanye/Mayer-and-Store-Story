@@ -5,7 +5,7 @@ import {
   updatePlayerData,
 } from "./utils";
 import { addResources, multiResource, checkTile } from "./utils";
-import {gameConfig, playerData, randActivities, TileResConfig, weatherEffect} from "./data";
+import {gameConfig, playerData, achievements, TileResConfig, weatherEffect} from "./data";
 import { scheduler } from "./schedular";
 import { ProgressBar } from "./timebar.ts";
 import {type PlayerEffect, type TileType, Weather} from "./types.ts";
@@ -208,6 +208,10 @@ export function applyShopBonus(): void {
   playerData.lasttotalIncome = totalSalesRevenue + baseIncomeGlobal;
   playerData.lastnetIncome =
     playerData.lasttotalIncome - totalMoneyCost - scaledFixedCost;
+  // 金币商店永久收入加成
+  if (playerData.incomeBonus > 0) {
+    playerData.lastnetIncome = Math.floor(playerData.lastnetIncome * (1 + playerData.incomeBonus / 100));
+  }
   playerData.money = Math.floor(playerData.money + playerData.lastnetIncome);
   playerData.totalprofit = Math.floor(
     playerData.totalprofit + playerData.lastnetIncome,
@@ -222,13 +226,13 @@ export function applyShopBonus(): void {
   playerData.day+=1;
 }
 
-function doRandomActivity(): void {
+function doAchievement(): void {
   const { prosperity, population, money, popularity } = playerData;
   //需要用到的玩家数据
   const data = { money, prosperity, population, popularity };
   let triggeredThisTurn = false;
   //筛选出未触发过的且排序一下
-  const act = randActivities
+  const act = achievements
     .map((item, index) => ({ item, index }))
     .filter((wrapper) => !wrapper.item.triggered)
     .sort((a, b) => {
@@ -249,7 +253,7 @@ function doRandomActivity(): void {
     if (matched < 0) return;
     const pvalue = act[matched].item.requirement[key as keyof PlayerEffect] ?? 0;
     if (value <= pvalue) {
-      randActivities[act[matched].index].triggered = true;
+      achievements[act[matched].index].triggered = true;
       act[matched].item.activity();
       triggeredThisTurn = true;
     }
@@ -318,7 +322,7 @@ function playWeatherAnime():void{
 const progressBar = new ProgressBar(gameConfig.DAY_SECOND, 5, () => {
   applyShopBonus();
   applyTileBonus();
-  doRandomActivity();
+  doAchievement();
   doWeatherActivity();
 });
 
@@ -336,6 +340,7 @@ function barLoop(timestamp: number) {
 }
 
 export function mainLoop(): void {
+  if(playerData.weather.last===-2)doWeatherActivity();
   requestAnimationFrame(barLoop);
   scheduler.addTask(updatePlayerData, 0, -1, 500);
   scheduler.addTask(updatePlayerRes, 0, -1, 500);

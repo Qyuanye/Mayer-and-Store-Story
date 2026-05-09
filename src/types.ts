@@ -156,6 +156,7 @@ export interface PlayerDatas {
     resourceLimit: Resource;
     inventory: InventoryItem[];
     unlockGoods: GoodsStatus[];
+    incomeBonus: number; // 金币商店购买的永久收入加成（百分比，如15=+15%）
     lasttotalIncome: number;
     lastnetIncome: number;
     weather:{type:Weather,
@@ -229,7 +230,7 @@ export interface GoodsStatus extends Goods {
     onSale: boolean;
 }
 
-export interface RandomActivity {
+export interface Achievement {
     requirement:PlayerEffect,
     triggered: boolean;
     activity: () => void;

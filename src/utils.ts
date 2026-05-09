@@ -230,6 +230,7 @@ export function updatePlayerData(): void {
   const textContainer = document.getElementById("weatherText");
   if (iconContainer && textContainer) {
     iconContainer.innerHTML = "";
+    if(playerData.weather.last===-2)return;
     const newIcon = weatherIcons[playerData.weather.type];
     if (newIcon) iconContainer.appendChild(newIcon);
     textContainer.textContent =
