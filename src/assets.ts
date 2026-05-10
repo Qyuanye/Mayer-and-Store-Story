@@ -14,14 +14,8 @@ import foggy from "./assets/weather/foggy.svg?url"
 import hailstorm from "./assets/weather/hailstorm.svg?url"
 import thunderstorm from "./assets/weather/thunderstorm.svg?url"
 
-import drop from "./assets/weather/drop.svg?url"
-import fog from "./assets/weather/fog.svg?url"
-import ice from "./assets/weather/ice.svg?url"
-import thunder from "./assets/weather/thunder.svg?url"
-
 export const tileImages: Record<string, HTMLImageElement> = {};
 export const weatherIcons: Record<string, HTMLImageElement> = {};
-export const weatherAnime:Record<string, HTMLImageElement> = {};
 
 const tileImgPaths: Record<TileType, string> = {
     [TileType.city]: city,
@@ -40,13 +34,6 @@ const weatherIconPaths:Record<Weather,string>={
     [Weather.foggy]:foggy,
     [Weather.hail]:hailstorm,
     [Weather.thunder]:thunderstorm
-}
-
-const weatherAnimePaths:Record<Exclude<Weather, Weather.sunny>,string>={
-    [Weather.rainy]:drop,
-    [Weather.foggy]:fog,
-    [Weather.hail]:ice,
-    [Weather.thunder]:thunder
 }
 
 async function preloadImageAssets<T extends string>(
@@ -70,7 +57,6 @@ async function preloadImageAssets<T extends string>(
 export async function preloadAllAssets(): Promise<void> {
     await Promise.all([
         preloadImageAssets(tileImgPaths, tileImages),
-        preloadImageAssets(weatherAnimePaths, weatherAnime),
         preloadImageAssets(weatherIconPaths, weatherIcons),
     ]);
 }

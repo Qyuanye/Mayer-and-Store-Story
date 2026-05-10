@@ -2,6 +2,7 @@ import {
   asyncDialog,
   hideTaskHint,
   showConfirmDialog,
+  showErrorHint,
   showInputDialog,
   showMenuDialog,
   showTaskHint,
@@ -23,7 +24,8 @@ import { goldItems, globalItems, tileItems } from "./itemLibrary.ts";
 import { baseIncomeGlobal, fixedCost } from "./tile.ts";
 import { help, helpText1, helpText2, helpText3, helpText4 } from "./gtext.ts";
 import {playerData, ShopGoods, TileDataConfig, TileResConfig} from "./data.ts";
-import {presetTile, TileName, TileType} from "./types.ts";
+import {presetTile, TileName, TileType, Weather} from "./types.ts";
+import {startWeather} from "./weather.ts";
 
 export function menuPlaceTile(): void {
   //过滤不能放的
@@ -51,7 +53,7 @@ export function menuPlaceTile(): void {
       !compResource(TileResConfig[tileKey[e]].placeCost!, playerData.resource)
     ) {
       hideTaskHint();
-      showTextDialog(["资源不够!"]);
+      showErrorHint("资源不够!");
       return;
     }
     showTaskHint("点击放置");
@@ -90,7 +92,7 @@ export function menuGoldshop() {
     if (selectedIndex === -1) return;
     const selectedItem = goldItems[selectedIndex];
     if (playerData.gold < selectedItem.price) {
-      showTextDialog(["金币不足!"]);
+      showErrorHint("金币不足!");
       return;
     }
     playerData.gold -= selectedItem.price;
@@ -123,7 +125,7 @@ export function menuItem() {
       ).then((e) => {
         if (e == -1) return;
         if (playerData.money < prices[e]) {
-          showTextDialog(["钱不够!"]);
+          showErrorHint("钱不够!");
           return;
         }
         playerData.money -= prices[e];
@@ -254,16 +256,16 @@ export function menuShop() {
     } else if (e == 1) {
       const onSell = playerData.unlockGoods.filter((e) => e.onSale);
       showMenuDialog(
-        "onsell",
-        onSell.map((e) => e.name),
-        onSell.map(
-          (e) =>
-            `定价:${e.price}，单件成本:${e.cost}，昨日售出:${e.sold}，
+          "在售中",
+          onSell.map((e) => e.name),
+          onSell.map(
+              (e) =>
+                  `定价:${e.price}，单件成本:${e.cost}，昨日售出:${e.sold}，
               单件需要资源:${formatResRequirement(e.costRes).slice(4)}，
               昨日消耗:${formatResRequirement(multiResource(e.costRes, e.sold)).slice(4)}，
               昨日利润:${e.sold * (e.price - e.cost)}`,
-        ),
-      );
+          ),
+      ).then();
     } else if (e == 2) {
       //过滤出没有的
       const onSell = playerData.unlockGoods.map((e) => e.name);
@@ -276,7 +278,7 @@ export function menuShop() {
         if (e == -1) return;
         showConfirmDialog(`要研究${names[e]}吗?`, () => {
           if (!compResource(locked[e].unlockRes, playerData.resource)) {
-            showTextDialog(["资源不足!"]);
+            showErrorHint("资源不足!");
             return;
           } else {
             playerData.resource = subResources(
@@ -348,5 +350,94 @@ export function menuHelp() {
     if (e == 1) showTextDialog(helpText2);
     if (e == 2) showTextDialog(helpText3);
     if (e == 3) showTextDialog(helpText4);
+  });
+}
+
+export function menuDebug(): void {
+  showMenuDialog("调试菜单", [
+    "加钱 (+10000)",
+    "加黄金 (+50)",
+    "调整金钱",
+    "调整黄金",
+    "资源填满",
+    "调整单项资源",
+    "调整人口",
+    "调整人气",
+    "调整繁荣度",
+    "修改天气",
+  ]).then((e) => {
+    if (e === -1) return;
+    switch (e) {
+      case 0:
+        playerData.money += 10000;
+        showTextDialog([`金钱 +10000，当前: ${playerData.money}`]);
+        break;
+      case 1:
+        playerData.gold += 50;
+        showTextDialog([`黄金 +50，当前: ${playerData.gold}`]);
+        break;
+      case 2:
+        showInputDialog<number>(
+            "输入新金钱数:", (v) => v < 0 ? "不能为负" : null,
+            undefined, (v) => { playerData.money = v; showTextDialog([`金钱已设为 ${v}`]); },
+        );
+        break;
+      case 3:
+        showInputDialog<number>(
+            "输入新黄金数:", (v) => v < 0 ? "不能为负" : null,
+            undefined, (v) => { playerData.gold = v; showTextDialog([`黄金已设为 ${v}`]); },
+        );
+        break;
+      case 4:
+        for (const k of ["wood","metal","water","fabric","stone","food"] as (keyof Resource)[])
+          playerData.resource[k] = playerData.resourceLimit[k];
+        showTextDialog(["所有资源已填满!"]);
+        break;
+      case 5: {
+        const resKeys = ["wood","metal","water","fabric","stone","food"] as (keyof Resource)[];
+        const names = ["木材","金属","水","纤维","石头","食物"];
+        showMenuDialog("选择资源", names).then((r) => {
+          if (r === -1) return;
+          showInputDialog<number>(
+              `输入${names[r]}数量:`, (v) => v < 0 ? "不能为负" : null,
+              undefined, (v) => {
+                playerData.resource[resKeys[r]] = v;
+                showTextDialog([`${names[r]}已设为 ${v}`]);
+              },
+          );
+        });
+        break;
+      }
+      case 6:
+        showInputDialog<number>(
+            "输入人口数:", (v) => v < 0 ? "不能为负" : null,
+            undefined, (v) => { playerData.population = v; showTextDialog([`人口已设为 ${v}`]); },
+        );
+        break;
+      case 7:
+        showInputDialog<number>(
+            "输入人气值:", (v) => v < 0 ? "不能为负" : null,
+            undefined, (v) => { playerData.popularity = v; showTextDialog([`人气已设为 ${v}`]); },
+        );
+        break;
+      case 8:
+        showInputDialog<number>(
+            "输入繁荣度:", (v) => v < 0 ? "不能为负" : null,
+            undefined, (v) => { playerData.prosperity = v; showTextDialog([`繁荣度已设为 ${v}`]); },
+        );
+        break;
+      case 9: {
+        const wtypes = [Weather.sunny, Weather.rainy, Weather.foggy, Weather.hail, Weather.thunder];
+        const wnames = ["晴天", "雨天", "雾天", "冰雹", "雷雨天"];
+        showMenuDialog("选择天气", wnames).then((r) => {
+          if (r === -1) return;
+          playerData.weather.type = wtypes[r];
+          playerData.weather.last = 5;
+          startWeather(wtypes[r]);
+          showTextDialog([`天气已设为 ${wnames[r]}`]);
+        });
+        break;
+      }
+    }
   });
 }

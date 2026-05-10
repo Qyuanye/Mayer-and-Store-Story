@@ -9,7 +9,7 @@ import {gameConfig, playerData, achievements, TileResConfig, weatherEffect} from
 import { scheduler } from "./schedular";
 import { ProgressBar } from "./timebar.ts";
 import {type PlayerEffect, type TileType, Weather} from "./types.ts";
-import { weatherAnime } from "./assets.ts";
+import { startWeather, stopWeather } from "./weather.ts";
 
 function applyTileBonus(): void {
   let totalAddRes: Resource = {
@@ -49,21 +49,29 @@ function applyTileBonus(): void {
 }
 
 function updatePlayerRes() {
-  document
-    .querySelectorAll<HTMLSpanElement>("span.info-value")
-    .forEach((spanElement) => {
-      //从data-res属性获取key
-      const key = spanElement.dataset.res as keyof Resource;
-      if (!key || playerData.resource[key] === undefined) return;
-      playerData.resource[key] = Math.min(
-        playerData.resource[key],
-        playerData.resourceLimit[key],
-      );
-      const currentVal = playerData.resource[key];
-      const maxVal = playerData.resourceLimit[key];
-      spanElement.innerText = String(currentVal);
-      spanElement.toggleAttribute("data-max", currentVal >= maxVal);
-    });
+  const spans = document.querySelectorAll<HTMLSpanElement>("span.info-value");
+  spans.forEach((spanElement) => {
+    const key = spanElement.dataset.res as keyof Resource;
+    if (!key || playerData.resource[key] === undefined) return;
+    playerData.resource[key] = Math.min(
+      playerData.resource[key],
+      playerData.resourceLimit[key],
+    );
+    const currentVal = playerData.resource[key];
+    const maxVal = playerData.resourceLimit[key];
+    const prevText = spanElement.innerText;
+    const prevVal = parseInt(prevText) || 0;
+    spanElement.innerText = String(currentVal);
+    spanElement.toggleAttribute("data-max", currentVal >= maxVal);
+    if (currentVal !== prevVal) {
+      spanElement.classList.remove("value-up", "value-down", "jump-anim");
+      void (spanElement as HTMLElement).offsetWidth;
+      spanElement.classList.add(currentVal > prevVal ? "value-up" : "value-down", "jump-anim");
+      setTimeout(() => {
+        spanElement.classList.remove("value-up", "value-down", "jump-anim");
+      }, 350);
+    }
+  });
 }
 
 //-------------！！！！！----计算商店的收益-------！！！！！----------------
@@ -252,7 +260,7 @@ function doAchievement(): void {
     const matched = keys.indexOf(key);//按key逐一匹配
     if (matched < 0) return;
     const pvalue = act[matched].item.requirement[key as keyof PlayerEffect] ?? 0;
-    if (value <= pvalue) {
+    if (value >= pvalue) {
       achievements[act[matched].index].triggered = true;
       act[matched].item.activity();
       triggeredThisTurn = true;
@@ -310,13 +318,7 @@ function doWeatherActivity(): void {
 
 function playWeatherAnime():void{
   const weather = playerData.weather.type;
-  const overlay = document.getElementById("weatherOverlay");
-  if (!overlay) return;
-  overlay.innerHTML = "";
-  if (weather && weatherAnime[weather]) {
-    const svgImg = weatherAnime[weather].cloneNode(true) as HTMLImageElement;
-    overlay.appendChild(svgImg);
-  }
+  startWeather(weather);
 }
 
 const progressBar = new ProgressBar(gameConfig.DAY_SECOND, 5, () => {

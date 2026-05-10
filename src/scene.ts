@@ -2,6 +2,7 @@ import {
   asyncDialog,
   hideTaskHint,
   showButtonTextDialog,
+  showErrorHint,
   showTaskHint,
   showTextDialog,
 } from "./dialog";
@@ -21,6 +22,17 @@ import {tileImages} from "./assets.ts";
 import {Color, type GridCell, presetTile, type TileData, TileName, TileType} from "./types.ts";
 import {gameConfig, levelupRes, playerData, TileDataConfig, TileResConfig} from "./data.ts";
 
+interface EnvParticle {
+  type: 'leaf' | 'smoke' | 'ripple';
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  maxLife: number;
+  size: number;
+}
+
 export class GameScene {
   private canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
@@ -34,6 +46,11 @@ export class GameScene {
   private placeResolver: ((pos: Position | null) => void) | null = null;
   private demolishResolver: ((pos: Position | null) => void) | null = null;
   private selectResolver: ((pos: Position | null) => void) | null = null;
+  private tileAnimations: Map<string, { type: 'place' | 'upgrade' | 'demolish'; startTime: number; duration: number }> = new Map();
+  private _animFrameId: number = 0;
+  private envParticles: EnvParticle[] = [];
+  private _lastEnvSpawn: number = 0;
+  private _envFrameId: number = 0;
 
   constructor(canvasId: string) {
     this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
@@ -43,11 +60,119 @@ export class GameScene {
     this.refresh();
   }
 
+  public startTileAnim(row: number, col: number, type: 'place' | 'upgrade' | 'demolish'): void {
+    this.tileAnimations.set(`${row},${col}`, { type, startTime: performance.now(), duration: type === 'place' ? 400 : 300 });
+    if (!this._animFrameId) this._startAnimLoop();
+  }
+
+  private _startAnimLoop(): void {
+    if (this._animFrameId) return;
+    const tick = () => {
+      this.draw();
+      const now = performance.now();
+      let hasActive = false;
+      for (const anim of this.tileAnimations.values()) {
+        if (now - anim.startTime < anim.duration) { hasActive = true; break; }
+      }
+      for (const [key, anim] of this.tileAnimations) {
+        if (now - anim.startTime >= anim.duration) this.tileAnimations.delete(key);
+      }
+      if (hasActive) {
+        this._animFrameId = requestAnimationFrame(tick);
+      } else {
+        this._animFrameId = 0;
+        this.draw();
+      }
+    };
+    this._animFrameId = requestAnimationFrame(tick);
+  }
+
+  private _startEnvLoop(): void {
+    if (this._envFrameId) return;
+    const tick = (timestamp: number) => {
+      this._spawnEnvParticles(timestamp);
+      this._updateEnvParticles(timestamp);
+      this.draw();
+      if (this._anyEnvTile() || this.envParticles.length > 0) {
+        this._envFrameId = requestAnimationFrame(tick);
+      } else {
+        this._envFrameId = 0;
+      }
+    };
+    this._envFrameId = requestAnimationFrame(tick);
+  }
+
+  private _anyEnvTile(): boolean {
+    for (let r = 0; r < gameConfig.GRID_SIZE; r++) {
+      for (let c = 0; c < gameConfig.GRID_SIZE; c++) {
+        const t = this.grid[r]?.[c]?.data?.type as string;
+        if (t === 'forest' || t === 'factory' || t === 'river') return true;
+      }
+    }
+    return false;
+  }
+
+  private _spawnEnvParticles(timestamp: number): void {
+    if (timestamp - this._lastEnvSpawn < 80) return;
+    this._lastEnvSpawn = timestamp;
+    const maxParticles = 200;
+    if (this.envParticles.length >= maxParticles) return;
+    const cellW = this.canvas.width / gameConfig.GRID_SIZE;
+    const cellH = this.canvas.height / gameConfig.GRID_SIZE;
+    for (let r = 0; r < gameConfig.GRID_SIZE; r++) {
+      for (let c = 0; c < gameConfig.GRID_SIZE; c++) {
+        if (this.envParticles.length >= maxParticles) return;
+        const cell = this.grid[r]?.[c];
+        const type = cell?.data?.type as string;
+        const cx = cell.x;
+        const cy = cell.y;
+        if (type === 'forest' && Math.random() < 0.25) {
+          const maxLife = 3 + Math.random() * 2;
+          this.envParticles.push({
+            type: 'leaf', x: cx + Math.random() * cellW, y: cy - 2,
+            vx: (Math.random() - 0.5) * 20, vy: 8 + Math.random() * 15,
+            life: Math.min(2.5 + Math.random() * 2, maxLife), maxLife,
+            size: 2 + Math.random() * 3,
+          });
+        } else if (type === 'factory' && Math.random() < 0.4) {
+          const maxLife = 2 + Math.random() * 2;
+          this.envParticles.push({
+            type: 'smoke', x: cx + cellW * 0.2 + Math.random() * cellW * 0.6,
+            y: cy + cellH * 0.5,
+            vx: (Math.random() - 0.5) * 10, vy: -(10 + Math.random() * 20),
+            life: Math.min(1.5 + Math.random() * 2, maxLife), maxLife,
+            size: 4 + Math.random() * 6,
+          });
+        } else if (type === 'river' && Math.random() < 0.35) {
+          const maxLife = 1 + Math.random() * 1;
+          this.envParticles.push({
+            type: 'ripple', x: cx + Math.random() * cellW, y: cy + Math.random() * cellH,
+            vx: 0, vy: 0,
+            life: Math.min(0.8 + Math.random() * 1.2, maxLife), maxLife,
+            size: 3 + Math.random() * 4,
+          });
+        }
+      }
+    }
+  }
+
+  private _updateEnvParticles(timestamp: number): void {
+    const dt = 1 / 60;
+    this.envParticles = this.envParticles.filter(p => {
+      p.life -= dt;
+      if (p.life <= 0) return false;
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      return true;
+    });
+  }
+
   public refresh(): void {
     this.canvas.width = this.canvas.clientWidth;
     this.canvas.height = this.canvas.clientHeight;
     this.initGrid();
     this.draw();
+    if (this._anyEnvTile() && !this._envFrameId) this._startEnvLoop();
   }
 
   private initGrid(): void {
@@ -128,6 +253,62 @@ export class GameScene {
             );
           }
         }}
+    }
+    // 绘制地块动画叠加层
+    for (const [key, anim] of this.tileAnimations) {
+      const [r, c] = key.split(',').map(Number);
+      const cell = this.grid[r]?.[c];
+      if (!cell) continue;
+      const now = performance.now();
+      const elapsed = now - anim.startTime;
+      if (elapsed >= anim.duration) continue;
+      const t = 1 - elapsed / anim.duration;
+      ctx.lineWidth = 3 * t;
+      if (anim.type === 'place') {
+        ctx.fillStyle = `rgba(76, 175, 80, ${t * 0.35})`;
+        ctx.fillRect(cell.x, cell.y, cell.width, cell.height);
+        ctx.strokeStyle = `rgba(76, 175, 80, ${t})`;
+        ctx.strokeRect(cell.x, cell.y, cell.width, cell.height);
+      } else if (anim.type === 'upgrade') {
+        ctx.fillStyle = `rgba(255, 215, 0, ${t * 0.4})`;
+        ctx.fillRect(cell.x, cell.y, cell.width, cell.height);
+        ctx.strokeStyle = `rgba(255, 215, 0, ${t})`;
+        ctx.strokeRect(cell.x, cell.y, cell.width, cell.height);
+      } else if (anim.type === 'demolish') {
+        ctx.fillStyle = `rgba(244, 67, 54, ${t * 0.4})`;
+        ctx.fillRect(cell.x, cell.y, cell.width, cell.height);
+      }
+    }
+    // 绘制环境粒子
+    for (const p of this.envParticles) {
+      const alpha = Math.max(0, Math.min(1, p.life / p.maxLife));
+      if (p.type === 'leaf') {
+        const a = alpha * 0.7;
+        ctx.fillStyle = `rgba(60, 140, 40, ${a})`;
+        ctx.beginPath();
+        ctx.ellipse(p.x, p.y, p.size, p.size * 0.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (p.type === 'smoke') {
+        const a = alpha * 0.7;
+        const r = p.size * (1.2 + alpha * 0.6);
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
+        grad.addColorStop(0, `rgba(80, 80, 90, ${a * 0.9})`);
+        grad.addColorStop(0.4, `rgba(100, 100, 115, ${a * 0.6})`);
+        grad.addColorStop(1, `rgba(130, 130, 145, 0)`);
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (p.type === 'ripple') {
+        const a = alpha * 0.7;
+        const progress = 1 - alpha;
+        const radius = p.size * (0.3 + progress);
+        ctx.strokeStyle = `rgba(160, 210, 250, ${a})`;
+        ctx.lineWidth = 1.2 * (1 - progress * 0.7);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+        ctx.stroke();
+      }
     }
   }
 
@@ -233,6 +414,7 @@ export class GameScene {
       );
       if (isConfirmed) {
         this.grid[pos.row][pos.col].data = { ...presetTile[TileType.grass] };
+        this.startTileAnim(pos.row, pos.col, 'demolish');
         this.draw();
         const tileKey = Object.keys(TileType).find(
           (key) => TileType[key as keyof typeof TileType] === tileData.type,
@@ -307,7 +489,7 @@ public cancelMode = (): void => {
         const tileKey = Object.keys(TileType).find(k => TileType[k as keyof typeof TileType] === data.type);
         cost = TileResConfig[tileKey || ""].placeCost || {};
         if (!compResource(cost, playerData.resource)) {
-          showTextDialog(['资源不够']);
+          showErrorHint("资源不够");
           continue;
         }
       }
@@ -315,6 +497,7 @@ public cancelMode = (): void => {
       const isConfirmed = await asyncDialog("confirm", "确定要放置在这里吗?");
       if (isConfirmed && this.placeMode) {
         this.updateTile(pos.row, pos.col, { data: { ...data } });
+        this.startTileAnim(pos.row, pos.col, 'place');
         if (data.type !== TileType.shop) {
           playerData.resource = subResources(playerData.resource, cost);
         }
@@ -382,14 +565,12 @@ public cancelMode = (): void => {
         "升级地块",
         () => {
           if (!compResource(req, playerData.resource)) {
-            showTaskHint("资源不够!");
-            setTimeout(() => {
-              hideTaskHint();
-            }, 3000);
+            showErrorHint("资源不够!");
           } else {
             playerData.resource=subResources(playerData.resource, req);
             showTaskHint("升级成功!");
             data.level += 1;
+            this.startTileAnim(row, col, 'upgrade');
             //修改数值
             playerData.population+=TileDataConfig[tileKey!].population??0;
             playerData.popularity+=TileDataConfig[tileKey!].popularity??0;
@@ -409,6 +590,7 @@ public cancelMode = (): void => {
     if (this.grid[row] && this.grid[row][col]) {
       this.grid[row][col] = { ...this.grid[row][col], ...data };
       this.draw();
+      if (this._anyEnvTile() && !this._envFrameId) this._startEnvLoop();
     }
   }
 }

@@ -12,6 +12,17 @@ import {
   weatherName
 } from "./types.ts";
 
+let prevPlayerVals: Record<string, number> = {};
+
+function flashValueCell(cell: HTMLElement, newVal: number, prevVal: number): void {
+  cell.classList.remove("value-up", "value-down", "jump-anim");
+  void cell.offsetWidth;
+  cell.classList.add(newVal > prevVal ? "value-up" : "value-down", "jump-anim");
+  setTimeout(() => {
+    cell.classList.remove("value-up", "value-down", "jump-anim");
+  }, 350);
+}
+
 export function shuffleArray<T>(arr: T[]): T[] {
   const result = [...arr];
   for (let i = result.length - 1; i > 0; i--) {
@@ -207,16 +218,34 @@ export function updatePlayerData(): void {
   const dataTable: HTMLTableCellElement[] = Array.from(
     document.querySelectorAll<HTMLTableCellElement>(".value-table td"), //6个
   ).slice(0, 6);
+  const currVals: Record<string, number> = {
+    money: playerData.money,
+    gold: playerData.gold,
+    popularity: playerData.popularity,
+    prosperity: playerData.prosperity,
+    population: playerData.population,
+    score: playerData.score,
+  };
   const strings: { [key: number]: string } = {
-    1: `金钱:${playerData.money}`,
-    2: `黄金:${playerData.gold}`,
-    3: `人气:${playerData.popularity}`,
-    4: `繁荣度:${playerData.prosperity}`,
-    5: `人口:${playerData.population}`,
+    1: `金钱:${currVals.money}`,
+    2: `黄金:${currVals.gold}`,
+    3: `人气:${currVals.popularity}`,
+    4: `繁荣度:${currVals.prosperity}`,
+    5: `人口:${currVals.population}`,
     6: `评级: `,
   };
+  const keys = ["money", "gold", "popularity", "prosperity", "population", "score"];
   dataTable.forEach((table, index) => {
-    if (index < 5) table.textContent = strings[index + 1] as string;
+    if (index < 5) {
+      const key = keys[index];
+      table.textContent = strings[index + 1] as string;
+      const newVal = currVals[key];
+      const prevVal = prevPlayerVals[key] ?? newVal;
+      if (prevVal !== undefined && newVal !== prevVal) {
+        flashValueCell(table, newVal, prevVal);
+      }
+      prevPlayerVals[key] = newVal;
+    }
     if (index === 5) {
       //最大评级S对应分数800，超过800分显示S
       if (Math.floor(playerData.score / 100) > 7) table.textContent = "评级: S";

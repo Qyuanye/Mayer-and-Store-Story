@@ -198,6 +198,16 @@ div:last-of-type {
   box-shadow: 1px 1px 0 #27408b;
 }
 
+.sidebar-clicked {
+  animation: btnPulse 0.2s ease-out;
+}
+
+@keyframes btnPulse {
+  0% { background-color: #e1f0ff; transform: scale(0.96); }
+  40% { background-color: #b3d7ff; transform: scale(0.93); }
+  100% { background-color: #ffffff; transform: scale(1); }
+}
+
 .canvas-wrapper {
   margin-top: 0;
 }

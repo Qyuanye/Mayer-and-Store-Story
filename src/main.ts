@@ -10,12 +10,15 @@ import {
   menuPlaceTile,
   menuShop,
 } from "./menu";
+import { menuDebug } from "./menu.ts";
 import { GameScene } from "./scene.ts";
 import { generateMap } from "./map.ts";
 import { initText, introduction } from "./gtext.ts";
 import {presetTile, TileType} from "./types.ts";
 import {playerData} from "./data.ts";
 import {preloadAllAssets} from "./assets.ts";
+
+const DEBUG = true;
 
 export const scene = new GameScene("mainCanvas");
 export let state: Appstats = {
@@ -57,6 +60,14 @@ function addListener(): void {
   document.getElementById("items")?.addEventListener("click", () => menuItem());
   document.getElementById("myshop")?.addEventListener("click", () => menuShop());
   document.getElementById("help")?.addEventListener("click", () => menuHelp());
+  if (DEBUG) {
+    const debugBtn = document.createElement("button");
+    debugBtn.id = "debug";
+    debugBtn.textContent = "DEBUG";
+    debugBtn.style.backgroundColor = "#fff3cd";
+    document.getElementById("sidebarMenu")?.appendChild(debugBtn);
+    debugBtn.addEventListener("click", () => menuDebug());
+  }
   window.addEventListener("load", function () {
     const menu = document.getElementById("menu") as HTMLButtonElement;
     const sidebar = document.getElementById("sidebarMenu");
@@ -80,8 +91,12 @@ function addListener(): void {
     const sidebarButtons = sidebar.querySelectorAll("button");
     sidebarButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
-        sidebar.classList.remove("visible");
-        infoPanel.classList.remove("visible");
+        btn.classList.add("sidebar-clicked");
+        setTimeout(() => {
+          btn.classList.remove("sidebar-clicked");
+          sidebar.classList.remove("visible");
+          infoPanel.classList.remove("visible");
+        }, 120);
       });
     });
   });

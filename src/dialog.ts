@@ -31,6 +31,7 @@ export function showTextDialog(content: string[], onFinish?: () => void): void {
     dialog.appendChild(textElement);
     dialog.appendChild(hint);
     wrapper.appendChild(dialog);
+    requestAnimationFrame(() => { dialog.style.opacity = "1"; });
     let currentIndex = 0;
     const updateDisplay = () => {
       if (currentIndex < content.length) {
@@ -43,7 +44,7 @@ export function showTextDialog(content: string[], onFinish?: () => void): void {
             if (onFinish) onFinish();
           }
           onDialogClosed();
-        }, 300);
+        }, 200);
       }
     };
     updateDisplay();
@@ -111,7 +112,7 @@ export function showButtonTextDialog(
           }
           if (onFinish) onFinish();
           onDialogClosed();
-        }, 300);
+        }, 200);
       }
     };
     dialog.addEventListener("click", () => {
@@ -154,8 +155,11 @@ export function showConfirmDialog(
     btns.style.display = "flex";
     btns.style.gap = "15px";
     const closeConfirm = () => {
-      overlay.remove();
-      if (!isSubDialog) onDialogClosed();
+      overlay.style.opacity = "0";
+      setTimeout(() => {
+        overlay.remove();
+        if (!isSubDialog) onDialogClosed();
+      }, 200);
     };
 
     const yesBtn = document.createElement("button");
@@ -175,6 +179,7 @@ export function showConfirmDialog(
     btns.append(noBtn, yesBtn);
     overlay.append(text, btns);
     wrapper.appendChild(overlay);
+    requestAnimationFrame(() => { overlay.style.opacity = "1"; });
   };
 
   if (isSubDialog) {
@@ -221,8 +226,11 @@ export function showInputDialog<T extends string | number>(
     btnBox.style.gap = "20px";
 
     const finalClose = () => {
-      overlay.remove();
-      onDialogClosed();
+      overlay.style.opacity = "0";
+      setTimeout(() => {
+        overlay.remove();
+        onDialogClosed();
+      }, 200);
     };
 
     const handleConfirm = () => {
@@ -284,6 +292,7 @@ export function showInputDialog<T extends string | number>(
     btnBox.append(ccBtn, okBtn);
     overlay.append(title, input, errorHint, btnBox);
     wrapper.appendChild(overlay);
+    requestAnimationFrame(() => { overlay.style.opacity = "1"; });
   });
   processQueue();
 }
@@ -400,13 +409,17 @@ export function showMenuDialog(
       item.onmouseleave = () => (item.style.backgroundColor = "transparent");
       item.onclick = (e) => {
         e.stopPropagation();
-        overlay.remove();
-        resolve(index === options.length ? -1 : index);
+        overlay.style.opacity = "0";
+        setTimeout(() => {
+          overlay.remove();
+          resolve(index === options.length ? -1 : index);
+        }, 200);
       };
       listContainer.appendChild(item);
     });
     overlay.appendChild(listContainer);
     wrapper.appendChild(overlay);
+    requestAnimationFrame(() => { overlay.style.opacity = "1"; });
   });
 }
 
@@ -440,5 +453,21 @@ export function hideTaskHint(): void {
     if (hint.parentNode) {
       hint.parentNode.removeChild(hint);
     }
-  }, 300);
+  }, 200);
+}
+
+export function showErrorHint(text: string): void {
+  const wrapper = document.querySelector(".canvas-wrapper") as HTMLElement;
+  if (!wrapper) return;
+  const old = document.getElementById("error-hint");
+  if (old) old.remove();
+  const hint = document.createElement("div");
+  hint.id = "error-hint";
+  hint.innerText = text;
+  wrapper.appendChild(hint);
+  requestAnimationFrame(() => { hint.style.opacity = "1"; });
+  setTimeout(() => {
+    hint.style.opacity = "0";
+    setTimeout(() => { if (hint.parentNode) hint.remove(); }, 300);
+  }, 1800);
 }
